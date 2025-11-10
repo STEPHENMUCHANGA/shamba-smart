@@ -1,0 +1,272 @@
+/* 🌍 Global Styles */
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: linear-gradient(to bottom right, #f0fdf4, #dcfce7);
+  color: #1f2937;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+/* 🌿 NAVIGATION BAR */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  padding: 0.6rem 1.5rem;
+  height: 65px;
+  display: flex;
+  align-items: center;
+}
+
+/* 🌾 Navbar Layout */
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 🌱 Left Section: logo + home link */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: #166534;
+  text-decoration: none;
+}
+
+/* 🌿 Navigation Links */
+.nav-link,
+.nav-center li a,
+.nav-right li a {
+  text-decoration: none;
+  color: #166534;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.nav-link:hover,
+.nav-center li a:hover,
+.nav-right li a:hover {
+  color: #22c55e;
+}
+
+.active {
+  color: #15803d !important;
+  border-bottom: 2px solid #16a34a;
+}
+
+/* 🌾 Center Section (About, Free Trial, Pricing, Weather) */
+.nav-center {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* 🌤️ Weather Icon Style */
+.nav-center li a.weather-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: #166534;
+}
+
+.nav-center li a.weather-link:hover {
+  color: #22c55e;
+}
+
+/* 🌿 Right Section (Signup + Login) */
+.nav-right {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* 🌿 Page Content (below navbar) */
+.page-content {
+  padding-top: 5rem;
+}
+
+/* 🌿 Headings */
+h1, h2, h3 {
+  color: #166534;
+  text-align: center;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+}
+
+/* 🌿 Main Form Container */
+form {
+  background-color: white;
+  max-width: 350px;
+  width: 100%;
+  margin: 6rem auto 2rem auto;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+form:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+}
+
+/* 🌿 Inputs */
+input,
+textarea,
+select {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #f9fafb;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25);
+  background-color: #ffffff;
+}
+
+/* 🌿 Buttons */
+button {
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #15803d;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* 🌿 Results Display */
+pre {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  width: 100%;
+  max-width: 600px;
+  margin: 1.5rem auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 🌿 Utility Enhancements */
+::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* 🌿 Responsive Fixes */
+@media (max-width: 900px) {
+  .navbar-container {
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .nav-center,
+  .nav-right {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-content {
+    padding-top: 7rem;
+  }
+}
+
+@media (max-width: 700px) {
+  form {
+    padding: 1.2rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  button {
+    padding: 0.8rem;
+  }
+}
+
+/* 🌿 Smooth transitions */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Optional glass look */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
