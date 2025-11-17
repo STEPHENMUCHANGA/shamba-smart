@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -8,31 +8,61 @@ import Pricing from "./pages/Pricing";
 import Weather from "./pages/Weather";
 import About from "./pages/About";
 import SoilForm from "./components/SoilForm";
+import { AuthContext } from "./context/AuthContext";
 import "./index.css";
 
-// 🌿 Helper function — check trial validity
-const isTrialValid = () => {
-  const trialStart = localStorage.getItem("trialStart");
-  if (!trialStart) return false;
-  const startDate = new Date(trialStart);
-  const expiryDate = new Date(startDate);
-  expiryDate.setDate(startDate.getDate() + 7);
-  return new Date() <= expiryDate;
-};
+// Navbar component
+function Navbar({ user, logout }) {
+  const navigate = useNavigate();
 
-// 🌿 Protected Route logic
-const ProtectedRoute = ({ element: Element }) => {
-  const isAuthenticated = !!localStorage.getItem("user");
-  const hasValidTrial = isTrialValid();
-  const hasSubscription = localStorage.getItem("subscriptionActive") === "true";
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
-  if (!isAuthenticated && !hasValidTrial) return <Navigate to="/login" replace />;
-  if (!hasValidTrial && !hasSubscription) return <Navigate to="/pricing" replace />;
+  return (
+    <nav className="navbar">
+      <div className="navbar-container">
+        <div className="nav-left">
+          <span className="logo">🌾 ShambaSmart</span>
+          {user && <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>Home</NavLink>}
+        </div>
 
-  return <Element />;
-};
+        <ul className="nav-center">
+          {user && (
+            <>
+              <li><NavLink to="/about">About</NavLink></li>
+              <li><NavLink to="/free-trial">Free Trial</NavLink></li>
+              <li><NavLink to="/pricing">Subscription</NavLink></li>
+              <li><NavLink to="/weather">Weather</NavLink></li>
+            </>
+          )}
+        </ul>
 
-// 🌿 Start Free Trial Button
+        <ul className="nav-right">
+          {!user ? (
+            <>
+              <li><NavLink to="/signup">Sign Up</NavLink></li>
+              <li><NavLink to="/login">Login</NavLink></li>
+            </>
+          ) : (
+            <li className="flex items-center gap-3">
+              <span style={{ color: "#166534", fontWeight: "600" }}>👋 {user.email}</span>
+              <button
+                onClick={handleLogout}
+                style={{ background: "transparent", border: "none", color: "#166534", fontWeight: "600", cursor: "pointer" }}
+              >
+                Logout
+              </button>
+            </li>
+          )}
+        </ul>
+      </div>
+    </nav>
+  );
+}
+
+// Free Trial Button
 function StartFreeTrialButton() {
   const navigate = useNavigate();
 
@@ -40,7 +70,7 @@ function StartFreeTrialButton() {
     const now = new Date();
     localStorage.setItem("trialStart", now.toISOString());
     alert("🎉 Your 7-day free trial has started!");
-    navigate("/soil-analysis"); // Redirect to SoilForm
+    navigate("/soil-analysis");
   };
 
   return (
@@ -53,103 +83,35 @@ function StartFreeTrialButton() {
   );
 }
 
-function App() {
-  const isLoggedIn = !!localStorage.getItem("user");
-  const user = isLoggedIn ? JSON.parse(localStorage.getItem("user")) : null;
+// RequireAuth wrapper
+const RequireAuth = ({ user, children }) => {
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+};
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("trialStart");
-    localStorage.removeItem("subscriptionActive");
-    window.location.href = "/login";
-  };
+function App() {
+  const { user, logout } = useContext(AuthContext);
 
   return (
     <Router>
-      {/* 🌾 Navbar */}
-      <nav className="navbar">
-        <div className="navbar-container">
-          <div className="nav-left">
-            <span className="logo">🌾 ShambaSmart</span>
-            <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-              Home
-            </NavLink>
-          </div>
+      <Navbar user={user} logout={logout} />
 
-          <ul className="nav-center">
-            <li>
-              <NavLink to="/about" className={({ isActive }) => (isActive ? "active" : "")}>
-                About
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/free-trial" className={({ isActive }) => (isActive ? "active" : "")}>
-                Free Trial
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/pricing" className={({ isActive }) => (isActive ? "active" : "")}>
-                Subscription
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/weather" className={({ isActive }) => (isActive ? "active" : "")}>
-                Weather
-              </NavLink>
-            </li>
-          </ul>
-
-          <ul className="nav-right">
-            {!isLoggedIn ? (
-              <>
-                <li>
-                  <NavLink to="/signup" className={({ isActive }) => (isActive ? "active" : "")}>
-                    Sign Up
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/login" className={({ isActive }) => (isActive ? "active" : "")}>
-                    Login
-                  </NavLink>
-                </li>
-              </>
-            ) : (
-              <li className="flex items-center gap-3">
-                <span style={{ color: "#166534", fontWeight: "600", fontSize: "0.95rem" }}>
-                  👋 {user.name ? user.name.split(" ")[0] : user.email}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "#166534",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                  }}
-                >
-                  Logout
-                </button>
-              </li>
-            )}
-          </ul>
-        </div>
-      </nav>
-
-      {/* 🌿 Routes */}
       <div className="page-content">
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/free-trial" element={<FreeTrial StartButton={StartFreeTrialButton} />} />
 
           {/* Protected Routes */}
-          <Route path="/pricing" element={<ProtectedRoute element={Pricing} />} />
-          <Route path="/weather" element={<ProtectedRoute element={Weather} />} />
-          <Route path="/soil-analysis" element={<ProtectedRoute element={SoilForm} />} />
+          <Route path="/" element={<RequireAuth user={user}><Home /></RequireAuth>} />
+          <Route path="/about" element={<RequireAuth user={user}><About /></RequireAuth>} />
+          <Route path="/free-trial" element={<RequireAuth user={user}><FreeTrial StartButton={StartFreeTrialButton} /></RequireAuth>} />
+          <Route path="/pricing" element={<RequireAuth user={user}><Pricing /></RequireAuth>} />
+          <Route path="/weather" element={<RequireAuth user={user}><Weather /></RequireAuth>} />
+          <Route path="/soil-analysis" element={<RequireAuth user={user}><SoilForm /></RequireAuth>} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to={user ? "/" : "/login"} replace />} />
         </Routes>
       </div>
     </Router>

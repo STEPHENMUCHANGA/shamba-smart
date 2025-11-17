@@ -1,9 +1,19 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useContext } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Leaf, Home } from "lucide-react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // ✅ Use global auth state instead of localStorage
+  const { user, logout } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    logout(); // Clears session + user
+    navigate("/login");
+  };
 
   return (
     <nav className="w-full bg-white shadow-md py-3 px-8 flex items-center justify-between fixed top-0 left-0 z-50">
@@ -27,7 +37,7 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Middle Links: About, Subscription, Free Trial */}
+      {/* Middle Links */}
       <div className="flex items-center gap-10 text-green-700 font-medium">
         <Link
           to="/about"
@@ -66,22 +76,42 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Right Section: Login + Signup */}
+      {/* Right Section: User Info or Login/Signup */}
       <div className="flex items-center gap-6">
-        <Link
-          to="/login"
-          className={`text-green-700 hover:text-green-500 transition font-medium ${
-            location.pathname === "/login" ? "text-green-600" : ""
-          }`}
-        >
-          Login
-        </Link>
-        <Link
-          to="/signup"
-          className="bg-green-700 text-white px-4 py-1.5 rounded-lg hover:bg-green-600 transition font-medium"
-        >
-          Sign Up
-        </Link>
+        {!user ? (
+          <>
+            {/* Not logged in */}
+            <Link
+              to="/login"
+              className={`text-green-700 hover:text-green-500 transition font-medium ${
+                location.pathname === "/login" ? "text-green-600" : ""
+              }`}
+            >
+              Login
+            </Link>
+
+            <Link
+              to="/signup"
+              className="bg-green-700 text-white px-4 py-1.5 rounded-lg hover:bg-green-600 transition font-medium"
+            >
+              Sign Up
+            </Link>
+          </>
+        ) : (
+          <>
+            {/* Logged in */}
+            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-lg font-medium">
+              👋 {user?.name?.split(" ")[0] || user.email}
+            </span>
+
+            <button
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-800 font-medium transition"
+            >
+              Logout
+            </button>
+          </>
+        )}
       </div>
     </nav>
   );
