@@ -22,11 +22,16 @@ function Navbar({ user, logout }) {
 
   return (
     <nav className="navbar">
-      <div className="navbar-container">
-        <div className="nav-left">
+      <div className="navbar-container flex items-center justify-between">
+          <div className="logo-container flex flex-col leading-tight">
           <span className="logo">🌾 ShambaSmart</span>
+          <br />
+          <span className="text-sm text-gray-600">AI-powered agriculture platform in Kenya</span>
+          </div>
+        <div className="nav-left">
           {user && <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>Home</NavLink>}
         </div>
+          
 
         <ul className="nav-center">
           {user && (

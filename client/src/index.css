@@ -42,7 +42,7 @@ body {
 /* 🌱 Left Section: logo + home link */
 .nav-left {
   display: flex;
-  align-items: center;
+  align-items: flex;
   gap: 0.8rem;
 }
 
@@ -51,6 +51,9 @@ body {
   font-size: 1.4rem;
   color: #166534;
   text-decoration: none;
+  flex-direction:column;
+  text-align: left;
+  align-items: flex-start;
 }
 
 /* 🌿 Navigation Links */
