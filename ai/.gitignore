@@ -1,0 +1,6 @@
+# Ignore all .env files
+*.env
+/ai/.env
+/client/.env
+/server/.env
+/node_modules/
