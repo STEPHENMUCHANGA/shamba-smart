@@ -6,28 +6,32 @@ import hashlib
 import os
 from openai import OpenAI
 
+# ------------------------------
+# Flask App Initialization
+# ------------------------------
 app = Flask(__name__)
 
-# ------------------------------
-# CORS CONFIG
-# ------------------------------
 CORS(app, origins=[
     os.getenv("CLIENT_URL"),
     "https://shambasmart.vercel.app",
 ], supports_credentials=True)
 
 # ------------------------------
-# OpenAI Client
-# ------------------------------
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-# ------------------------------
-# Simple In-Memory "Database"
+# Simple in-memory user "database"
 # ------------------------------
 users = {}
 
 # ------------------------------
-# AUTH ROUTES
+# Initialize OpenAI Client
+# ------------------------------
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY environment variable is not set!")
+
+openai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+# ------------------------------
+# Authentication Routes
 # ------------------------------
 @app.route("/api/signup", methods=["POST"])
 def signup():
@@ -65,17 +69,19 @@ def login():
     return jsonify({"message": "Login successful", "user": {"email": email}}), 200
 
 # ------------------------------
-# SOIL ANALYSIS
+# Soil Analysis Endpoint
 # ------------------------------
 @app.route("/api/analyze", methods=["POST"])
 def analyze():
     data = request.get_json()
     soil_ph = data.get("ph", 6.5)
     nitrogen = data.get("nitrogen", 0.3)
+    rainfall = data.get("rainfall", 800)
 
+    # Basic AI-like crop recommendation logic
     if soil_ph < 5.5:
         crop = "Beans"
-    elif soil_ph <= 7.5:
+    elif 5.5 <= soil_ph <= 7.5:
         crop = "Maize"
     else:
         crop = "Sorghum"
@@ -87,57 +93,45 @@ def analyze():
     })
 
 # ------------------------------
-# WEATHER ANALYSIS
+# Weather AI Endpoint using OpenAI
 # ------------------------------
 @app.route("/api/weather", methods=["POST"])
 def weather():
     data = request.get_json()
     location = data.get("location", "Unknown")
 
-    return jsonify({
-        "location": location,
-        "temperature": round(random.uniform(18, 32), 1),
-        "humidity": random.randint(40, 90),
-        "wind_speed": round(random.uniform(2, 10), 1),
-        "condition": random.choice(["Sunny", "Partly Cloudy", "Rainy", "Stormy"]),
-        "ai_prediction": random.choice([
-            "Favourable for maize growth",
-            "Expect rainfall within 48 hours",
-            "Hot and dry — irrigation recommended",
-            "Mild weather suitable for planting"
-        ])
-    })
-
-# ------------------------------
-# OPENAI AI ENDPOINT
-# ------------------------------
-@app.route("/api/ask", methods=["POST"])
-def ask_openai():
-    data = request.get_json()
-    prompt = data.get("prompt", "")
-
-    if not prompt:
-        return jsonify({"error": "Prompt is required"}), 400
-
     try:
-        response = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are ShambaSmart AI, a helpful agricultural assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=400
+        # Use OpenAI GPT to generate AI weather prediction
+        prompt = (
+            f"Provide a brief AI-generated weather forecast for {location}. "
+            "Include temperature, humidity, wind speed, weather condition, "
+            "and an AI prediction for farming suitability."
         )
 
-        ai_text = response.choices[0].message["content"]
-        return jsonify({"reply": ai_text})
+        response = openai_client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=150
+        )
+
+        ai_text = response.choices[0].message.content.strip()
+
+        # For simplicity, we mock numeric values alongside AI text
+        return jsonify({
+            "location": location,
+            "temperature": round(random.uniform(18, 32), 1),
+            "humidity": random.randint(40, 90),
+            "wind_speed": round(random.uniform(2, 10), 1),
+            "condition": random.choice(["Sunny", "Partly Cloudy", "Rainy", "Stormy"]),
+            "ai_prediction": ai_text
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 # ------------------------------
-# MAIN ENTRY FOR RENDER
+# Main Entry Point (Render-compatible)
 # ------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
