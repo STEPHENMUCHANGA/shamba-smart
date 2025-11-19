@@ -4,22 +4,31 @@ import random
 import re
 import hashlib
 import os
+from openai import OpenAI
 
 app = Flask(__name__)
 
+# ------------------------------
+# CORS CONFIG
+# ------------------------------
 CORS(app, origins=[
     os.getenv("CLIENT_URL"),
     "https://shambasmart.vercel.app",
 ], supports_credentials=True)
 
-# ---------------------------------
-# Simple in-memory user "database"
-# ---------------------------------
+# ------------------------------
+# OpenAI Client
+# ------------------------------
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# ------------------------------
+# Simple In-Memory "Database"
+# ------------------------------
 users = {}
 
-# ---------------------------------
-# AUTHENTICATION ROUTES
-# ---------------------------------
+# ------------------------------
+# AUTH ROUTES
+# ------------------------------
 @app.route("/api/signup", methods=["POST"])
 def signup():
     data = request.get_json()
@@ -55,22 +64,21 @@ def login():
 
     return jsonify({"message": "Login successful", "user": {"email": email}}), 200
 
-
-# ---------------------------------
-# SOIL ANALYSIS ENDPOINT
-# ---------------------------------
-@app.route('/api/analyze', methods=['POST'])
+# ------------------------------
+# SOIL ANALYSIS
+# ------------------------------
+@app.route("/api/analyze", methods=["POST"])
 def analyze():
     data = request.get_json()
-    soil_ph = data.get('ph', 6.5)
-    nitrogen = data.get('nitrogen', 0.3)
+    soil_ph = data.get("ph", 6.5)
+    nitrogen = data.get("nitrogen", 0.3)
 
     if soil_ph < 5.5:
-        crop = 'Beans'
+        crop = "Beans"
     elif soil_ph <= 7.5:
-        crop = 'Maize'
+        crop = "Maize"
     else:
-        crop = 'Sorghum'
+        crop = "Sorghum"
 
     return jsonify({
         "recommendation": crop,
@@ -78,14 +86,13 @@ def analyze():
         "soil_status": "Fertile" if nitrogen > 0.3 else "Needs fertilizer"
     })
 
-
-# ---------------------------------
-# WEATHER ANALYSIS ENDPOINT
-# ---------------------------------
-@app.route('/api/weather', methods=['POST'])
+# ------------------------------
+# WEATHER ANALYSIS
+# ------------------------------
+@app.route("/api/weather", methods=["POST"])
 def weather():
     data = request.get_json()
-    location = data.get('location', 'Unknown')
+    location = data.get("location", "Unknown")
 
     return jsonify({
         "location": location,
@@ -101,9 +108,35 @@ def weather():
         ])
     })
 
-# ---------------------------------
-# MAIN ENTRY POINT (Render-compatible)
-# ---------------------------------
-if __name__ == '__main__':
+# ------------------------------
+# OPENAI AI ENDPOINT
+# ------------------------------
+@app.route("/api/ask", methods=["POST"])
+def ask_ai():
+    data = request.get_json()
+    prompt = data.get("prompt", "")
+
+    if not prompt:
+        return jsonify({"error": "Prompt is required"}), 400
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are ShambaSmart AI, a helpful agricultural assistant."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        ai_text = response.choices[0].message["content"]
+        return jsonify({"reply": ai_text})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ------------------------------
+# MAIN ENTRY FOR RENDER
+# ------------------------------
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host="0.0.0.0", port=port)
