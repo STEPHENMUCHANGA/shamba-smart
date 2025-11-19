@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'http://localhost:5173',                       // local dev
   process.env.FRONTEND_URL, 
-  'https://shambasmart.vercel.app/',                     // Vercel URL
+  'https://shambasmart.vercel.app',                     // Vercel URL
   process.env.RENDER_EXTERNAL_URL                // Render URL (automatically assigned)
 ].filter(Boolean); // remove undefined values
 
