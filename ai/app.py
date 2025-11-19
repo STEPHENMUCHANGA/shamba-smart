@@ -11,10 +11,11 @@ from openai import OpenAI
 # ------------------------------
 app = Flask(__name__)
 
-CORS(app, origins=[
-    os.getenv("FRONTEND_URL"),
-    "https://shambasmart.vercel.app",
-], supports_credentials=True)
+# CORS: allow frontend URLs
+frontend_urls = [
+    os.getenv("FRONTEND_URL", "https://shambasmart.vercel.app"),
+]
+CORS(app, origins=frontend_urls, supports_credentials=True)
 
 # ------------------------------
 # Simple in-memory user "database"
@@ -71,8 +72,8 @@ def login():
 # ------------------------------
 # Soil Analysis Endpoint
 # ------------------------------
-@app.route("/api/analyze", methods=["POST"])
-def analyze():
+@app.route("/api/soil/analyze", methods=["POST"])
+def analyze_soil():
     data = request.get_json()
     soil_ph = data.get("ph", 6.5)
     nitrogen = data.get("nitrogen", 0.3)
@@ -86,14 +87,17 @@ def analyze():
     else:
         crop = "Sorghum"
 
+    soil_status = "Fertile" if nitrogen > 0.3 else "Needs fertilizer"
+    predicted_yield = f"{round(random.uniform(3.0, 7.0), 2)} tons/ha"
+
     return jsonify({
         "recommendation": crop,
-        "predicted_yield": f"{round(random.uniform(3.0, 7.0), 2)} tons/ha",
-        "soil_status": "Fertile" if nitrogen > 0.3 else "Needs fertilizer"
+        "predicted_yield": predicted_yield,
+        "soil_status": soil_status
     })
 
 # ------------------------------
-# Weather AI Endpoint using OpenAI
+# Weather AI Endpoint
 # ------------------------------
 @app.route("/api/weather", methods=["POST"])
 def weather():
@@ -101,15 +105,14 @@ def weather():
     location = data.get("location", "Unknown")
 
     try:
-        # Use OpenAI GPT to generate AI weather prediction
         prompt = (
             f"Provide a brief AI-generated weather forecast for {location}. "
-            "Include temperature, humidity, wind speed, weather condition, "
-            "and an AI prediction for farming suitability."
+            "Include temperature, humidity, wind speed, condition, and farming advice."
         )
 
+        # Use GPT-3.5-turbo for wider access
         response = openai_client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=150
@@ -117,7 +120,7 @@ def weather():
 
         ai_text = response.choices[0].message.content.strip()
 
-        # For simplicity, we mock numeric values alongside AI text
+        # Mock numeric values for simplicity
         return jsonify({
             "location": location,
             "temperature": round(random.uniform(18, 32), 1),
@@ -128,11 +131,13 @@ def weather():
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print("Weather API error:", str(e))
+        return jsonify({"error": "Failed to fetch weather", "details": str(e)}), 500
 
 # ------------------------------
-# Main Entry Point (Render-compatible)
+# Main Entry Point
 # ------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
+    print(f"🚀 Flask server running on port {port}")
     app.run(host="0.0.0.0", port=port)

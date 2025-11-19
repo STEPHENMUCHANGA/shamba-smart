@@ -6,6 +6,7 @@ const analyzeSoil = async (req, res) => {
     console.log('🔔 Received soil analysis request with body:', req.body);
     const sample = req.body;
 
+    // Save to DB (non-blocking)
     try {
       const doc = new SoilSample(sample);
       await doc.save();
@@ -14,8 +15,11 @@ const analyzeSoil = async (req, res) => {
       console.error('DB save failed (continuing):', dbErr.message);
     }
 
-    const aiUrl = process.env.AI_API_URL;
+    const aiBase = process.env.AI_API_URL?.trim();
+    const aiUrl = `${aiBase}/api/soil/analyze`;
+
     console.log('🌐 Calling AI service at:', aiUrl);
+
     const aiResponse = await axios.post(aiUrl, sample, { timeout: 30000 });
 
     const result = {
@@ -25,9 +29,13 @@ const analyzeSoil = async (req, res) => {
 
     console.log('✅ AI response received');
     return res.status(200).json(result);
+
   } catch (err) {
     console.error('❌ analyzeSoil error:', err.message);
-    return res.status(500).json({ error: 'Server error during soil analysis', details: err.message });
+    return res.status(500).json({
+      error: 'Server error during soil analysis',
+      details: err.message
+    });
   }
 };
 

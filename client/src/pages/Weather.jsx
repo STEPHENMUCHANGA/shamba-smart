@@ -15,20 +15,22 @@ function Weather() {
     setRecommendation("");
 
     try {
-      const response = await fetch(`http://localhost:8000/api/weather`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/weather`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ location }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch weather data");
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to fetch weather data");
       }
 
       const data = await response.json();
       setWeatherData(data);
       generateRecommendation(data);
     } catch (err) {
+      console.error("❌ fetchWeather error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -44,7 +46,8 @@ function Weather() {
     let advice = "";
 
     if (condition.includes("rain")) {
-      advice = "🌧️ Expect rainfall — ideal for planting and irrigation. Avoid spraying pesticides today.";
+      advice =
+        "🌧️ Expect rainfall — ideal for planting and irrigation. Avoid spraying pesticides today.";
     } else if (temp > 30) {
       advice = "🔥 High temperatures — ensure adequate irrigation and mulch to retain soil moisture.";
     } else if (temp >= 20 && temp <= 30 && humidity >= 50) {
@@ -94,7 +97,6 @@ function Weather() {
           <p>💨 Wind Speed: <strong>{weatherData.wind_speed} km/h</strong></p>
           <p>🤖 AI Prediction: <strong>{weatherData.ai_prediction}</strong></p>
 
-          {/* New AI Recommendation Section */}
           {recommendation && (
             <div className="mt-4 bg-green-50 border-l-4 border-green-600 p-3 rounded-md text-green-900">
               <p className="font-semibold">🌾 ShambaSmart partners' expertise and AI Recommendation:</p>
