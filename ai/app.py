@@ -12,7 +12,7 @@ from openai import OpenAI
 app = Flask(__name__)
 
 CORS(app, origins=[
-    os.getenv("CLIENT_URL"),
+    os.getenv("FRONTEND_URL"),
     "https://shambasmart.vercel.app",
 ], supports_credentials=True)
 
