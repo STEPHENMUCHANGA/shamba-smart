@@ -2,10 +2,19 @@ import os
 import re
 import random
 import hashlib
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from google import genai
+from dotenv import load_dotenv
+
+# ------------------------------
+# Load environment variables
+# ------------------------------
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is not set!")
 
 # ------------------------------
 # FastAPI App Initialization
@@ -31,14 +40,10 @@ app.add_middleware(
 users = {}
 
 # ------------------------------
-# Configure Gemini
+# Create Gemini client
 # ------------------------------
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is not set!")
-
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-pro")
+client = genai.Client(api_key=GEMINI_API_KEY)
+model_name = "gemini-pro"
 
 # ------------------------------
 # Pydantic Models
@@ -79,7 +84,6 @@ async def signup(data: AuthModel):
 
     return {"message": "Signup successful!"}
 
-
 @app.post("/api/login")
 async def login(data: AuthModel):
     email = data.email.strip().lower()
@@ -117,9 +121,8 @@ Provide:
 4. Yield prediction (in tons/ha)
 5. Short explanation
 """
-
     try:
-        ai_response = model.generate_content(prompt)
+        ai_response = client.generate_text(model=model_name, prompt=prompt)
         ai_text = ai_response.text
 
         return {
@@ -146,9 +149,8 @@ Give a short weather forecast for {data.location}. Include:
 - General weather condition (sunny, cloudy, rainy, etc.)
 - A farming recommendation for the day
 """
-
     try:
-        ai_response = model.generate_content(prompt)
+        ai_response = client.generate_text(model=model_name, prompt=prompt)
         ai_text = ai_response.text
 
         return {
