@@ -7,13 +7,13 @@ const AI_BASE = import.meta.env.VITE_AI_URL?.trim() || 'http://localhost:8000'; 
 // Backend API instance (for user auth, other server endpoints)
 const API = axios.create({
   baseURL: `${BASE_API}/api`,
-  timeout: 30000
+  timeout: 60000
 });
 
 // AI API instance (for soil & weather analysis)
 const AI_API = axios.create({
   baseURL: `${AI_BASE}/api`,
-  timeout: 30000
+  timeout: 60000
 });
 
 // ----------------------------
