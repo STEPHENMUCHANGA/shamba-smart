@@ -16,7 +16,9 @@ const analyzeSoil = async (req, res) => {
     }
 
     const aiBase = process.env.AI_API_URL?.trim();
-    const aiUrl = `${aiBase}/api/soil/analyze`;
+
+    // ✅ Correct AI route (Flask)
+    const aiUrl = `${aiBase}/api/analyze`;
 
     console.log('🌐 Calling AI service at:', aiUrl);
 
@@ -24,16 +26,16 @@ const analyzeSoil = async (req, res) => {
 
     const result = {
       analysis: aiResponse.data,
-      message: 'Soil analyzed successfully'
+      message: "Soil analyzed successfully"
     };
 
-    console.log('✅ AI response received');
+    console.log("✅ AI response received");
     return res.status(200).json(result);
 
   } catch (err) {
-    console.error('❌ analyzeSoil error:', err.message);
+    console.error("❌ analyzeSoil error:", err.message);
     return res.status(500).json({
-      error: 'Server error during soil analysis',
+      error: "Server error during soil analysis",
       details: err.message
     });
   }
