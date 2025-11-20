@@ -52,6 +52,7 @@ const startServer = async () => {
 
     // Routes
     app.use('/api/soil', soilRoutes);
+    app.use('/api/weather', weatherRoutes);
 
     // Start server
     app.listen(PORT, () => {

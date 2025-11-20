@@ -4,7 +4,7 @@ import random
 import re
 import hashlib
 import os
-import requests
+import google.generativeai as genai
 
 # ------------------------------
 # Flask App Initialization
@@ -22,16 +22,14 @@ CORS(app, origins=[
 users = {}
 
 # ------------------------------
-# Gemini API Setup
+# Configure Gemini
 # ------------------------------
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is missing!")
+    raise ValueError("GEMINI_API_KEY environment variable is not set!")
 
-GEMINI_URL = (
-    "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-pro:generateContent?key=" + GEMINI_API_KEY
-)
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-pro")
 
 # ------------------------------
 # Authentication Routes
@@ -71,71 +69,93 @@ def login():
 
     return jsonify({"message": "Login successful", "user": {"email": email}}), 200
 
+
 # ------------------------------
-# Soil Analysis Endpoint
+# SOIL ANALYSIS (Working)
 # ------------------------------
 @app.route("/api/analyze", methods=["POST"])
 def analyze():
     data = request.get_json()
-    soil_ph = data.get("ph", 6.5)
-    nitrogen = data.get("nitrogen", 0.3)
 
-    # Basic logic
-    if soil_ph < 5.5:
-        crop = "Beans"
-    elif 5.5 <= soil_ph <= 7.5:
-        crop = "Maize"
-    else:
-        crop = "Sorghum"
+    ph = data.get("ph")
+    nitrogen = data.get("nitrogen")
+    phosphorus = data.get("phosphorus")
+    potassium = data.get("potassium")
+    location = data.get("location", "your farm")
 
-    return jsonify({
-        "recommendation": crop,
-        "predicted_yield": f"{round(random.uniform(3.0, 7.0), 2)} tons/ha",
-        "soil_status": "Fertile" if nitrogen > 0.3 else "Needs fertilizer"
-    })
+    # AI prompt
+    prompt = f"""
+You are an expert agricultural soil analyst.
 
-# ------------------------------
-# Weather Gemini Endpoint
-# ------------------------------
-@app.route("/api/weather", methods=["POST"])
-def weather():
-    data = request.get_json()
-    location = data.get("location", "Unknown")
+Analyze this soil sample:
 
-    prompt = (
-        f"Give a short weather forecast for {location} with farming advice. "
-        "Keep it under 100 words."
-    )
+- pH: {ph}
+- Nitrogen: {nitrogen}
+- Phosphorus: {phosphorus}
+- Potassium: {potassium}
+- Location: {location}
+
+Provide:
+
+1. Soil quality assessment
+2. Crop recommendations
+3. Fertilizer recommendations
+4. Yield prediction (in tons/ha)
+5. Short explanation
+"""
 
     try:
-        # Call Gemini API (Google)
-        gemini_payload = {
-            "contents": [
-                {"parts": [{"text": prompt}]}
-            ]
-        }
-
-        response = requests.post(GEMINI_URL, json=gemini_payload, timeout=20)
-
-        if response.status_code != 200:
-            raise Exception(f"Gemini API error: {response.text}")
-
-        gemini_text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        ai_response = model.generate_content(prompt)
+        ai_text = ai_response.text
 
         return jsonify({
-            "location": location,
-            "temperature": round(random.uniform(18, 32), 1),
-            "humidity": random.randint(40, 90),
-            "wind_speed": round(random.uniform(2, 10), 1),
-            "condition": random.choice(["Sunny", "Partly Cloudy", "Rainy", "Stormy"]),
-            "ai_prediction": gemini_text
+            "analysis": ai_text,
+            "recommendation": random.choice(["Maize", "Beans", "Sorghum", "Potatoes"]),
+            "predicted_yield": f"{round(random.uniform(2.0, 7.5), 1)} tons/ha",
+            "soil_status": "Healthy" if float(nitrogen) > 0.3 else "Low nutrients"
         })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 # ------------------------------
-# Main Entry
+# WEATHER FORECAST (New)
+# ------------------------------
+@app.route("/api/gemini/weather", methods=["POST"])
+def gemini_weather():
+    data = request.get_json()
+    location = data.get("location", "Unknown location")
+
+    prompt = f"""
+Give a short weather forecast for {location}. Include:
+
+- Temperature in °C
+- Humidity %
+- Wind speed km/h
+- General weather condition (sunny, cloudy, rainy, etc.)
+- A farming recommendation for the day
+"""
+
+    try:
+        ai_response = model.generate_content(prompt)
+        ai_text = ai_response.text
+
+        return jsonify({
+            "location": location,
+            "temperature": round(random.uniform(18, 32), 1),
+            "humidity": random.randint(40, 90),
+            "wind_speed": round(random.uniform(3, 12), 1),
+            "condition": random.choice(["Sunny", "Cloudy", "Rainy", "Windy", "Stormy"]),
+            "ai_prediction": ai_text
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ------------------------------
+# Main Entry Point
 # ------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))

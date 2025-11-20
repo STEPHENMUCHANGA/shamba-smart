@@ -17,20 +17,24 @@ const analyzeSoil = async (req, res) => {
 
     const aiBase = process.env.AI_API_URL?.trim();
 
-    // ✅ Correct AI route (Flask)
-    const aiUrl = `${aiBase}/api/analyze`;
+    if (!aiBase) {
+      console.error("❌ AI_API_URL missing in server environment!");
+      return res.status(500).json({ error: "AI server URL not configured" });
+    }
+
+    // ✅ Correct Gemini Flask route
+    const aiUrl = `${aiBase}/api/gemini/soil`;
 
     console.log('🌐 Calling AI service at:', aiUrl);
 
     const aiResponse = await axios.post(aiUrl, sample, { timeout: 30000 });
 
-    const result = {
-      analysis: aiResponse.data,
-      message: "Soil analyzed successfully"
-    };
-
     console.log("✅ AI response received");
-    return res.status(200).json(result);
+
+    return res.status(200).json({
+      analysis: aiResponse.data.ai_recommendation,
+      message: "Soil analyzed successfully"
+    });
 
   } catch (err) {
     console.error("❌ analyzeSoil error:", err.message);
