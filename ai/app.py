@@ -6,6 +6,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from google import genai
+from dotenv import load_dotenv
+
+# ------------------------------
+# Load environment variables
+# ------------------------------
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is not set!")
 
 # ------------------------------
 # FastAPI App Initialization
@@ -31,14 +40,10 @@ app.add_middleware(
 users = {}
 
 # ------------------------------
-# Configure Gemini
+# Create Gemini client
 # ------------------------------
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is not set!")
-
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-pro")
+client = genai.Client(api_key=GEMINI_API_KEY)
+model_name = "gemini-pro"
 
 # ------------------------------
 # Pydantic Models
@@ -56,13 +61,6 @@ class SoilModel(BaseModel):
 
 class WeatherModel(BaseModel):
     location: str = "Unknown location"
-
-# ------------------------------
-# Root Route
-# ------------------------------
-@app.get("/")
-async def root():
-    return {"message": "Shamba Smart API is running!"}
 
 # ------------------------------
 # Authentication Routes
@@ -86,7 +84,6 @@ async def signup(data: AuthModel):
 
     return {"message": "Signup successful!"}
 
-
 @app.post("/api/login")
 async def login(data: AuthModel):
     email = data.email.strip().lower()
@@ -101,7 +98,7 @@ async def login(data: AuthModel):
     return {"message": "Login successful", "user": {"email": email}}
 
 # ------------------------------
-# Soil Analysis Endpoint
+# SOIL ANALYSIS
 # ------------------------------
 @app.post("/api/analyze")
 async def analyze(data: SoilModel):
@@ -124,9 +121,8 @@ Provide:
 4. Yield prediction (in tons/ha)
 5. Short explanation
 """
-
     try:
-        ai_response = model.generate_content(prompt)
+        ai_response = client.generate_text(model=model_name, prompt=prompt)
         ai_text = ai_response.text
 
         return {
@@ -140,7 +136,7 @@ Provide:
         raise HTTPException(status_code=500, detail=str(e))
 
 # ------------------------------
-# Weather Forecast Endpoint
+# WEATHER FORECAST
 # ------------------------------
 @app.post("/api/gemini/weather")
 async def gemini_weather(data: WeatherModel):
@@ -153,9 +149,8 @@ Give a short weather forecast for {data.location}. Include:
 - General weather condition (sunny, cloudy, rainy, etc.)
 - A farming recommendation for the day
 """
-
     try:
-        ai_response = model.generate_content(prompt)
+        ai_response = client.generate_text(model=model_name, prompt=prompt)
         ai_text = ai_response.text
 
         return {
