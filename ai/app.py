@@ -4,18 +4,17 @@ import random
 import re
 import hashlib
 import os
-from openai import OpenAI
+import requests
 
 # ------------------------------
 # Flask App Initialization
 # ------------------------------
 app = Flask(__name__)
 
-# CORS: allow frontend URLs
-frontend_urls = [
-    os.getenv("FRONTEND_URL", "https://shambasmart.vercel.app"),
-]
-CORS(app, origins=frontend_urls, supports_credentials=True)
+CORS(app, origins=[
+    os.getenv("FRONTEND_URL"),
+    "https://shambasmart.vercel.app",
+], supports_credentials=True)
 
 # ------------------------------
 # Simple in-memory user "database"
@@ -23,13 +22,16 @@ CORS(app, origins=frontend_urls, supports_credentials=True)
 users = {}
 
 # ------------------------------
-# Initialize OpenAI Client
+# Gemini API Setup
 # ------------------------------
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    raise ValueError("OPENAI_API_KEY environment variable is not set!")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is missing!")
 
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
+GEMINI_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/"
+    "gemini-pro:generateContent?key=" + GEMINI_API_KEY
+)
 
 # ------------------------------
 # Authentication Routes
@@ -72,14 +74,13 @@ def login():
 # ------------------------------
 # Soil Analysis Endpoint
 # ------------------------------
-@app.route("/api/soil/analyze", methods=["POST"])
-def analyze_soil():
+@app.route("/api/analyze", methods=["POST"])
+def analyze():
     data = request.get_json()
     soil_ph = data.get("ph", 6.5)
     nitrogen = data.get("nitrogen", 0.3)
-    rainfall = data.get("rainfall", 800)
 
-    # Basic AI-like crop recommendation logic
+    # Basic logic
     if soil_ph < 5.5:
         crop = "Beans"
     elif 5.5 <= soil_ph <= 7.5:
@@ -87,57 +88,55 @@ def analyze_soil():
     else:
         crop = "Sorghum"
 
-    soil_status = "Fertile" if nitrogen > 0.3 else "Needs fertilizer"
-    predicted_yield = f"{round(random.uniform(3.0, 7.0), 2)} tons/ha"
-
     return jsonify({
         "recommendation": crop,
-        "predicted_yield": predicted_yield,
-        "soil_status": soil_status
+        "predicted_yield": f"{round(random.uniform(3.0, 7.0), 2)} tons/ha",
+        "soil_status": "Fertile" if nitrogen > 0.3 else "Needs fertilizer"
     })
 
 # ------------------------------
-# Weather AI Endpoint
+# Weather Gemini Endpoint
 # ------------------------------
 @app.route("/api/weather", methods=["POST"])
 def weather():
     data = request.get_json()
     location = data.get("location", "Unknown")
 
+    prompt = (
+        f"Give a short weather forecast for {location} with farming advice. "
+        "Keep it under 100 words."
+    )
+
     try:
-        prompt = (
-            f"Provide a brief AI-generated weather forecast for {location}. "
-            "Include temperature, humidity, wind speed, condition, and farming advice."
-        )
+        # Call Gemini API (Google)
+        gemini_payload = {
+            "contents": [
+                {"parts": [{"text": prompt}]}
+            ]
+        }
 
-        # Use GPT-3.5-turbo for wider access
-        response = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=150
-        )
+        response = requests.post(GEMINI_URL, json=gemini_payload, timeout=20)
 
-        ai_text = response.choices[0].message.content.strip()
+        if response.status_code != 200:
+            raise Exception(f"Gemini API error: {response.text}")
 
-        # Mock numeric values for simplicity
+        gemini_text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+
         return jsonify({
             "location": location,
             "temperature": round(random.uniform(18, 32), 1),
             "humidity": random.randint(40, 90),
             "wind_speed": round(random.uniform(2, 10), 1),
             "condition": random.choice(["Sunny", "Partly Cloudy", "Rainy", "Stormy"]),
-            "ai_prediction": ai_text
+            "ai_prediction": gemini_text
         })
 
     except Exception as e:
-        print("Weather API error:", str(e))
-        return jsonify({"error": "Failed to fetch weather", "details": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 # ------------------------------
-# Main Entry Point
+# Main Entry
 # ------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    print(f"🚀 Flask server running on port {port}")
     app.run(host="0.0.0.0", port=port)
