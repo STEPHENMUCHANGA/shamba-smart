@@ -5,8 +5,7 @@ import hashlib
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import google.generativeai as genai
-from google import genai
+import google_genai as genai
 
 # ------------------------------
 # FastAPI App Initialization
