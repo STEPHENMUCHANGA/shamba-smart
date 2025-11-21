@@ -9,23 +9,26 @@ const getWeather = async (req, res) => {
       return res.status(400).json({ error: "Location is required" });
     }
 
-    // Use the Flask backend URL
-    const flaskBase = process.env.FLASK_API_URL?.trim();
-    if (!flaskBase) {
-      console.error("❌ FLASK_API_URL missing in server environment!");
-      return res.status(500).json({ error: "Flask backend URL not configured" });
+    const aiBase = process.env.AI_API_URL?.trim();
+    if (!aiBase) {
+      console.error("❌ AI_API_URL missing in environment!");
+      return res.status(500).json({ error: "AI server URL not configured" });
     }
 
-    const flaskUrl = `${flaskBase.replace(/\/$/, "")}/api/gemini/weather`;
+    const aiUrl = `${aiBase.replace(/\/$/, "")}/api/gemini/weather`;
+    console.log("🌦️ Calling Gemini Weather Service at:", aiUrl);
 
-    console.log("🌦️ Calling Flask Gemini Weather Service at:", flaskUrl);
+    // Increase timeout to 60s
+    const aiResponse = await axios.post(
+      aiUrl,
+      { location },
+      { timeout: 60000 }
+    );
 
-    const aiResponse = await axios.post(flaskUrl, { location }, { timeout: 25000 });
-
-    console.log("✅ Weather response received:", aiResponse.data);
+    console.log("✅ Weather response received");
 
     return res.status(200).json({
-      location: aiResponse.data.location,
+      location: location,
       temperature: aiResponse.data.temperature,
       humidity: aiResponse.data.humidity,
       wind_speed: aiResponse.data.wind_speed,
@@ -36,6 +39,7 @@ const getWeather = async (req, res) => {
 
   } catch (err) {
     console.error("❌ Weather error:", err.message);
+
     return res.status(500).json({
       error: "Failed to fetch weather",
       details: err.message
