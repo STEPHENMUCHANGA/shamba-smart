@@ -22,8 +22,8 @@ const analyzeSoil = async (req, res) => {
       return res.status(500).json({ error: "AI server URL not configured" });
     }
 
-    // ✅ Correct Gemini Flask route
-    const aiUrl = `${aiBase}/api/gemini/soil`;
+    // ✅ Correct Gemini FastAPI soil analysis route
+    const aiUrl = `${aiBase}/api/analyze`;
 
     console.log('🌐 Calling AI service at:', aiUrl);
 
@@ -32,7 +32,10 @@ const analyzeSoil = async (req, res) => {
     console.log("✅ AI response received");
 
     return res.status(200).json({
-      analysis: aiResponse.data.ai_recommendation,
+      analysis: aiResponse.data.analysis,
+      recommendation: aiResponse.data.recommendation,
+      predicted_yield: aiResponse.data.predicted_yield,
+      soil_status: aiResponse.data.soil_status,
       message: "Soil analyzed successfully"
     });
 
