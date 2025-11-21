@@ -15,22 +15,23 @@ const analyzeSoil = async (req, res) => {
       console.error('DB save failed (continuing):', dbErr.message);
     }
 
+    // Get the AI backend URL from environment
     const aiBase = process.env.AI_API_URL?.trim();
-
     if (!aiBase) {
       console.error("❌ AI_API_URL missing in server environment!");
       return res.status(500).json({ error: "AI server URL not configured" });
     }
 
-    // ✅ Correct Gemini FastAPI soil analysis route
+    // FastAPI soil analysis endpoint
     const aiUrl = `${aiBase}/api/analyze`;
-
     console.log('🌐 Calling AI service at:', aiUrl);
 
+    // Call FastAPI with timeout
     const aiResponse = await axios.post(aiUrl, sample, { timeout: 30000 });
 
     console.log("✅ AI response received");
 
+    // Return structured data
     return res.status(200).json({
       analysis: aiResponse.data.analysis,
       recommendation: aiResponse.data.recommendation,
@@ -41,9 +42,11 @@ const analyzeSoil = async (req, res) => {
 
   } catch (err) {
     console.error("❌ analyzeSoil error:", err.message);
+
+    // Detailed error for easier debugging
     return res.status(500).json({
       error: "Server error during soil analysis",
-      details: err.message
+      details: err.response?.data || err.message
     });
   }
 };
