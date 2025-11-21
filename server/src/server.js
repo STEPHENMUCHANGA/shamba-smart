@@ -11,25 +11,29 @@ const allowedOrigins = [
   'http://localhost:5173',                       // local dev
   process.env.FRONTEND_URL, 
   'https://shambasmart.vercel.app',                     // Vercel URL
-  process.env.RENDER_EXTERNAL_URL                // Render URL (automatically assigned)
+  //process.env.RENDER_EXTERNAL_URL                // Render URL (automatically assigned)
 ].filter(Boolean); // remove undefined values
 
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (e.g., mobile apps or curl)
-    if (!origin) return callback(null, true);
+  origin: ['http://localhost:5173', 'https://shambasmart.vercel.app'],
+  
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      console.warn(`❌ Blocked by CORS: ${origin}`);
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  credentials: true,
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     // Allow requests with no origin (e.g., mobile apps or curl)
+//     if (!origin) return callback(null, true);
+
+//     if (allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     } else {
+//       console.warn(`❌ Blocked by CORS: ${origin}`);
+// //       return callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+//   credentials: true,
+// };
 };
-
 const startServer = async () => {
   try {
     console.log('🔧 Starting server...');
@@ -40,7 +44,11 @@ const startServer = async () => {
     const app = express();
 
     // Apply dynamic CORS
-    app.use(cors(corsOptions));
+    //app.use(cors(corsOptions));
+    app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 
     // Parse JSON
     app.use(express.json());

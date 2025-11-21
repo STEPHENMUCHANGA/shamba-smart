@@ -163,7 +163,7 @@ Set environment variable VITE_API_BASE_URL to backend URL
 
 Deploy
 
-Backend (Render or Railway)
+Backend (Render)
 
 Push backend to GitHub
 
@@ -191,7 +191,16 @@ Government and NGO integration dashboards
 
 👨🏽‍💻 Authors
 
-Stephen Muchanga & Team
+Stephen Muchanga
 📧 info@shambasmart.co.ke
 
 🌍 Nairobi, Kenya
+
+
+# Deliverables
+1. Link to the deployed application
+https://shambasmart.vercel.app/
+2. Link to a 5-10 minute video demonstration
+Coming soon...
+3. Screenshots of key features
+[Images](screenshots/)

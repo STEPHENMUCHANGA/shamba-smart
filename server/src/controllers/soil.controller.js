@@ -15,6 +15,7 @@ const analyzeSoil = async (req, res) => {
       console.warn('⚠️ DB save failed (continuing):', dbErr.message);
     }
 
+  
     // Read AI backend URL
     const aiBase = process.env.AI_API_URL?.trim();
     if (!aiBase) {
