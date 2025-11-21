@@ -12,19 +12,20 @@ const analyzeSoil = async (req, res) => {
       await doc.save();
       console.log('💾 Soil sample saved with ID:', doc._id);
     } catch (dbErr) {
-      console.error('⚠️ DB save failed (continuing):', dbErr.message);
+      console.warn('⚠️ DB save failed (continuing):', dbErr.message);
     }
 
+    // Read AI backend URL
     const aiBase = process.env.AI_API_URL?.trim();
     if (!aiBase) {
-      console.error("❌ AI_API_URL missing in environment!");
-      return res.status(500).json({ error: "AI server URL not configured" });
+      console.error('❌ AI_API_URL missing in environment!');
+      return res.status(500).json({ error: 'AI server URL not configured' });
     }
 
-    const aiUrl = `${aiBase.replace(/\/$/, "")}/api/analyze`;
+    const aiUrl = `${aiBase.replace(/\/$/, '')}/api/analyze`;
     console.log('🌐 Calling AI service at:', aiUrl);
 
-    // Increase timeout to 60s
+    // Call AI backend with longer timeout
     const aiResponse = await axios.post(aiUrl, sample, { timeout: 60000 });
 
     console.log('✅ AI response received');
@@ -34,15 +35,15 @@ const analyzeSoil = async (req, res) => {
       recommendation: aiResponse.data.recommendation,
       predicted_yield: aiResponse.data.predicted_yield,
       soil_status: aiResponse.data.soil_status,
-      message: "Soil analyzed successfully"
+      message: 'Soil analyzed successfully'
     });
 
   } catch (err) {
-    console.error('❌ analyzeSoil error:', err.message);
+    console.error('❌ analyzeSoil error:', err.response?.data || err.message);
 
     return res.status(500).json({
-      error: "Server error during soil analysis",
-      details: err.message
+      error: 'Server error during soil analysis',
+      details: err.response?.data || err.message
     });
   }
 };
