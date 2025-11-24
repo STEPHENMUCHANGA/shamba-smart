@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from google import genai  # Gemini SDK
+import traceback
 
 # ------------------------------
 # Load environment variables
@@ -121,20 +122,25 @@ Provide:
     try:
         response = client.models.generate_content(
             model="gemini-1.5-flash",
-            contents=prompt
+            prompt=prompt
         )
 
         # Use response.last.output_text safely
-        analysis_text = response.text
+        analysis_text = response.output_text
+
+        try:
+            nitrogen_val = float(data.get("nitrogen", 0))
+        except (ValueError, TypeError):
+            nitrogen_val = 0.0
 
         return jsonify({
-            "analysis": ai_text,
+            "analysis": analysis_text,
             "recommendation": random.choice(["Maize", "Beans", "Sorghum", "Potatoes"]),
             "predicted_yield": f"{round(random.uniform(2.0, 7.5), 1)} tons/ha",
-            "soil_status": "Healthy" if float(data["nitrogen"]) > 0.3 else "Low nutrients"
+            "soil_status": "Healthy" if nitrogen_val > 0.3 else "Low nutrients"
         })
     except Exception as e:
-        print("❌ AI analyze_soil error:", e)
+        print("❌ AI analyze_soil error:\n", traceback.format_exc())
         return jsonify({"error": "AI processing failed", "details": str(e)}), 500
 
 # ------------------------------
@@ -158,10 +164,10 @@ Provide a short weather forecast for {location}. Include:
     try:
         response = client.models.generate_content(
             model="gemini-1.5-flash",
-            contents=prompt
+            prompt=prompt
         )
 
-        analysis_text = response.text
+        analysis_text = response.output_text
 
         return jsonify({
             "location": location,
@@ -169,10 +175,10 @@ Provide a short weather forecast for {location}. Include:
             "humidity": random.randint(40, 90),
             "wind_speed": round(random.uniform(3, 12), 1),
             "condition": random.choice(["Sunny", "Cloudy", "Rainy", "Windy", "Stormy"]),
-            "ai_prediction": ai_text
+            "ai_prediction": analysis_text
         })
     except Exception as e:
-        print("❌ AI weather error:", e)
+        print("❌ AI weather error:\n", traceback.format_exc())
         return jsonify({"error": "AI weather failed", "details": str(e)}), 500
 
 # ------------------------------
