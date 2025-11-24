@@ -176,6 +176,13 @@ Provide a short weather forecast for {location}. Include:
         return jsonify({"error": "AI weather failed", "details": str(e)}), 500
 
 # ------------------------------
+# HOME ROUTE (added)
+# ------------------------------
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "ShambaSmart AI Backend is running"}), 200
+
+# ------------------------------
 # Main entry point
 # ------------------------------
 if __name__ == "__main__":
