@@ -43,7 +43,7 @@ def add_cors_headers(response):
 # Gemini client setup
 # ------------------------------
 client = genai.Client(api_key=GEMINI_API_KEY)
-model_name = "gemini-pro"
+model_name = "gemini-1.5-flash"
 
 # ------------------------------
 # In-memory user storage
@@ -120,12 +120,12 @@ Provide:
 
     try:
         response = client.models.generate_content(
-            model=model_name,
-            messages=[{"role": "user", "content": prompt}]
+            model="gemini-1.5-flash",
+            contents=prompt
         )
 
         # Use response.last.output_text safely
-        ai_text = response.text if hasattr(response, "text") else "No response from AI."
+        analysis_text = response.text
 
         return jsonify({
             "analysis": ai_text,
@@ -157,11 +157,11 @@ Provide a short weather forecast for {location}. Include:
 
     try:
         response = client.models.generate_content(
-            model=model_name,
-            messages=[{"role": "user", "content": prompt}]
+            model="gemini-1.5-flash",
+            contents=prompt
         )
 
-        ai_text = response.text if hasattr(response, "text") else "No response from AI."
+        analysis_text = response.text
 
         return jsonify({
             "location": location,
