@@ -5,14 +5,15 @@ import re
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from google import genai  # Your Gemini AI client
+from google import genai  # Gemini SDK
 
 # ------------------------------
 # Load environment variables
 # ------------------------------
 load_dotenv()
+
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173", "https://shambasmart.vercel.app")
+FRONTEND_URL = os.getenv("FRONTEND_URL") or "http://localhost:5173"
 
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is not set!")
@@ -21,7 +22,22 @@ if not GEMINI_API_KEY:
 # Flask app initialization
 # ------------------------------
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "https://shambasmart.vercel.app"], supports_credentials=True)
+CORS(
+    app,
+    resources={r"/*": {"origins": ["http://localhost:5173", "https://shambasmart.vercel.app"]}},
+    supports_credentials=True,
+)
+
+@app.after_request
+def add_cors_headers(response):
+    allowed_origins = ["http://localhost:5173", "https://shambasmart.vercel.app"]
+    origin = request.headers.get("Origin")
+    if origin in allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
 
 # ------------------------------
 # Gemini client setup
@@ -51,14 +67,12 @@ def signup():
     data = request.json
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
-
     if not email or not password:
         return jsonify({"error": "Email and password are required"}), 400
     if not validate_email(email):
         return jsonify({"error": "Invalid email format"}), 400
     if email in users:
         return jsonify({"error": "Email already registered"}), 400
-
     users[email] = {"password": hash_password(password)}
     return jsonify({"message": "Signup successful!"})
 
@@ -68,11 +82,9 @@ def login():
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
     hashed_pw = hash_password(password)
-
     user = users.get(email)
     if not user or user["password"] != hashed_pw:
         return jsonify({"error": "Invalid login"}), 401
-
     return jsonify({"message": "Login successful", "user": {"email": email}})
 
 # ------------------------------
@@ -92,7 +104,6 @@ def analyze_soil():
 You are an expert agricultural soil analyst.
 
 Analyze this soil sample:
-
 - pH: {data['ph']}
 - Nitrogen: {data['nitrogen']}
 - Phosphorus: {data['phosphorus']}
@@ -100,7 +111,6 @@ Analyze this soil sample:
 - Location: {data.get('location', 'your farm')}
 
 Provide:
-
 1. Soil quality assessment
 2. Crop recommendations
 3. Fertilizer recommendations
@@ -109,9 +119,13 @@ Provide:
 """
 
     try:
-        ai_response = client.generate_text(model=model_name, prompt=prompt)
-        ai_text = getattr(ai_response, "text", str(ai_response))
-        print("✅ AI response received:", ai_text)
+        response = client.chat.create(
+            model=model_name,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        # Use response.last.output_text safely
+        ai_text = response.choices[0].content if response.choices else "No response from AI."
 
         return jsonify({
             "analysis": ai_text,
@@ -120,7 +134,7 @@ Provide:
             "soil_status": "Healthy" if float(data["nitrogen"]) > 0.3 else "Low nutrients"
         })
     except Exception as e:
-        print("❌ AI generate_text error:", e)
+        print("❌ AI analyze_soil error:", e)
         return jsonify({"error": "AI processing failed", "details": str(e)}), 500
 
 # ------------------------------
@@ -133,18 +147,21 @@ def gemini_weather():
     print("🔔 Weather request received for location:", location)
 
     prompt = f"""
-Give a short weather forecast for {location}. Include:
-
+Provide a short weather forecast for {location}. Include:
 - Temperature in °C
 - Humidity %
 - Wind speed km/h
 - General weather condition
-- A farming recommendation for the day
+- Farming recommendation for the day
 """
+
     try:
-        ai_response = client.generate_text(model=model_name, prompt=prompt)
-        ai_text = ai_response.text
-        print("✅ AI weather response received:", ai_text)
+        response = client.chat.create(
+            model=model_name,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        ai_text = response.choices[0].message["content"] if response.choices else "No response from AI."
 
         return jsonify({
             "location": location,
@@ -162,5 +179,8 @@ Give a short weather forecast for {location}. Include:
 # Main entry point
 # ------------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", 10001))
+    print(f"🚀 Backend running on port {port}")
+    print(f"🌍 Allowed FRONTEND URL: {FRONTEND_URL}")
+    print(f"🤖 Gemini Model: {model_name}")
     app.run(host="0.0.0.0", port=port)

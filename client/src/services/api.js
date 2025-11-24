@@ -1,25 +1,28 @@
 import axios from "axios";
 
-const AI_BASE_URL = "https://shamba-smart-1.onrender.com"; // your deployed backend
+// Use environment variable for API base URL
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const analyzeSoil = async (data) => {
   try {
-    const response = await axios.post(`${AI_BASE_URL}/api/analyze`, data, {
-      withCredentials: true
+    const response = await axios.post(`${API_URL}/soil/analyze`, data, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true, // if you need cookies/auth
     });
     return response.data;
-  } catch (err) {
-    console.error("❌ analyzeSoil error:", err);
-    throw err;
+  } catch (error) {
+    console.error("❌ analyzeSoil error:", error);
+    throw error;
   }
 };
 
-export const getWeather = async (location) => {
+// Example for weather API
+export const getWeather = async (county) => {
   try {
-    const response = await axios.post(`${AI_BASE_URL}/api/gemini/weather`, { location });
+    const response = await axios.get(`${API_URL}/weather/get?county=${county}`);
     return response.data;
-  } catch (err) {
-    console.error("❌ getWeather error:", err);
-    throw err;
+  } catch (error) {
+    console.error("❌ getWeather error:", error);
+    throw error;
   }
 };
