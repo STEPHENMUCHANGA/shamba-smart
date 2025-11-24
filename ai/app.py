@@ -119,13 +119,13 @@ Provide:
 """
 
     try:
-        response = client.chat.create(
+        response = client.models.generate_content(
             model=model_name,
             messages=[{"role": "user", "content": prompt}]
         )
 
         # Use response.last.output_text safely
-        ai_text = response.choices[0].content if response.choices else "No response from AI."
+        ai_text = response.text if hasattr(response, "text") else "No response from AI."
 
         return jsonify({
             "analysis": ai_text,
@@ -156,12 +156,12 @@ Provide a short weather forecast for {location}. Include:
 """
 
     try:
-        response = client.chat.create(
+        response = client.models.generate_content(
             model=model_name,
             messages=[{"role": "user", "content": prompt}]
         )
 
-        ai_text = response.choices[0].message["content"] if response.choices else "No response from AI."
+        ai_text = response.text if hasattr(response, "text") else "No response from AI."
 
         return jsonify({
             "location": location,
