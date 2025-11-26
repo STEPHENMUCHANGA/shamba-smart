@@ -13,7 +13,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://shambasmart.vercel.app",
+      "https://shamba-smart-five.vercel.app",
       "https://shamba-smart-tjf8.onrender.com",
     ],
     methods: "GET,POST,PUT,DELETE",
