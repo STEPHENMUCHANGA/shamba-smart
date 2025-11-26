@@ -2,16 +2,16 @@
 🌱 ShambaSmart – AI-Powered Agriculture Platform for Kenya
 📘 Overview
 
-ShambaSmart is Kenya’s first AI-powered platform for sustainable agriculture.
-It leverages Artificial Intelligence (AI) and the MERN stack (MongoDB, Express.js, React.js, Node.js) to transform how farmers, agronomists, and agricultural institutions access real-time insights about soil health, crop recommendations, and climate predictions.
+ShambaSmart is Kenya’s first platform for sustainable agriculture.
+It leverages modern technology and the MERN stack (MongoDB, Express.js, React.js, Node.js) to transform how farmers, agronomists, and agricultural institutions access real-time insights about soil health, crop recommendations, and climate predictions.
 
 The goal is to maximize yields, improve environmental sustainability, and empower Kenyan farmers through technology.
 
 🌍 Core Features
 
-AI Soil Analysis – Analyze soil nutrient content and health in real time.
+Experts' Soil Analysis – Analyze soil nutrient content and health in real time.
 
-Crop Recommendations – AI-driven suggestions based on soil data, local weather, and market demand.
+Crop Recommendations – Expertise'-driven suggestions based on soil data, local weather, and market demand.
 
 Climate Insights – Real-time weather data and predictive analytics from Kenya Meteorological Department APIs.
 
@@ -24,10 +24,6 @@ Farm Analytics Dashboard – Interactive charts to track performance, sustainabi
 Multilingual Interface – English, Swahili, and French support.
 
 Responsive Design – Works seamlessly across desktop and mobile devices.
-
-🧠 AI Integration
-
-Model Hosting: TensorFlow.js / PyTorch models deployed via a Flask or FastAPI microservice.
 
 ML Models:
 
@@ -82,10 +78,6 @@ ShambaSmart/
 │   │   └── server.js
 │   ├── package.json
 │
-├── ai-service/              # Python microservice for ML
-│   ├── models/
-│   ├── api/
-│   └── requirements.txt
 │
 ├── .env.example             # Sample environment variables
 ├── .gitignore
@@ -103,8 +95,6 @@ Node.js
 MongoDB
  or MongoDB Atlas account
 
-Python
- (for AI microservice)
 
 Git
 
@@ -125,7 +115,7 @@ Create .env in backend/ with:
 PORT=5000
 MONGO_URI=your_mongodb_connection
 JWT_SECRET=your_jwt_secret
-AI_API_URL=http://localhost:8000
+
 
 4️⃣ Setup Frontend
 cd frontend
@@ -137,12 +127,6 @@ Create .env in frontend/:
 
 VITE_API_BASE_URL=http://localhost:5000
 
-5️⃣ Setup AI Microservice
-cd ai-service
-python -m venv venv
-source venv/bin/activate      # (or venv\Scripts\activate on Windows)
-pip install -r requirements.txt
-python app.py
 
 🚀 Deployment Options
 Platform	Description
@@ -173,13 +157,14 @@ Set environment variables from .env
 
 Deploy
 
-AI Microservice
 
 Deploy Flask app on Render / AWS EC2 / Hugging Face Spaces
 
 Expose endpoint (e.g. https://ai.shambasmart.co.ke/analyze)
 
 📊 Future Enhancements
+
+AI enhanced analysis
 
 Integration with IoT soil sensors
 
@@ -192,6 +177,9 @@ Government and NGO integration dashboards
 👨🏽‍💻 Authors
 
 Stephen Muchanga
+
+stephenmuchanga@gmail.com 
+
 📧 info@shambasmart.co.ke
 
 🌍 Nairobi, Kenya
@@ -199,7 +187,7 @@ Stephen Muchanga
 
 # Deliverables
 1. Link to the deployed application
-https://shambasmart.vercel.app/
+https://shamba-smart-five.vercel.app/
 2. Link to a 5-10 minute video demonstration
 Coming soon...
 3. Screenshots of key features
