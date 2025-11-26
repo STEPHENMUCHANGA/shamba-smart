@@ -102,7 +102,7 @@ export default function SoilForm() {
         <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
           <h3>Analysis Result</h3>
           <p><strong>Soil Status:</strong> {result.soilStatus}</p>
-          <p><strong>Recommended Crops:</strong> {result.recommendedCrops}</p>
+          <p><strong>Recommended Crop:</strong> {result.recommendedCrop}</p>
           <p><strong>Expected Yield:</strong> {result.expectedYield}</p>
           <p><strong>Fertilizer Advice:</strong> {result.fertilizerAdvice}</p>
           <p><strong>Additional Notes:</strong> {result.additionalNotes}</p>
