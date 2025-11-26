@@ -76,7 +76,7 @@ app.post("/api/soil/analyze", (req, res) => {
 // --------------------------------------------------------
 // WEATHER ENDPOINT (NODE-ONLY)
 // --------------------------------------------------------
-const WEATHER_API_KEY = process.env.OPENWEATHER_KEY; // Set this in your .env
+const OPENWEATHER_KEY = process.env.OPENWEATHER_KEY; // Set this in your .env
 
 app.get("/api/weather/get", async (req, res) => {
   const { county } = req.query;
@@ -88,7 +88,7 @@ app.get("/api/weather/get", async (req, res) => {
   try {
     console.log("🌦 Fetching weather for:", county);
 
-    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${county}&units=metric&appid=${WEATHER_API_KEY}`;
+    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${county}&units=metric&appid=${OPENWEATHER_KEY}`;
 
     const { data } = await axios.get(weatherUrl);
 
@@ -117,5 +117,5 @@ const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Node server running on port ${PORT}`);
-  console.log("🌍 Weather API Key Loaded:", WEATHER_API_KEY ? "Yes" : "No ❌");
+  console.log("🌍 Weather API Key Loaded:", OPENWEATHER_KEY ? "Yes" : "No ❌");
 });
