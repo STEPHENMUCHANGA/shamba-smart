@@ -97,11 +97,11 @@ function Weather() {
           <p>☁️ Condition: <strong>{weatherData.condition}</strong></p>
           <p>💧 Humidity: <strong>{weatherData.humidity}%</strong></p>
           <p>💨 Wind Speed: <strong>{weatherData.wind_speed} km/h</strong></p>
-          <p>🤖 AI Prediction: <strong>{weatherData.ai_prediction}</strong></p>
+          <p>🤖 Experts' Prediction: <strong>{weatherData.ai_prediction}</strong></p>
 
           {recommendation && (
             <div className="mt-4 bg-green-50 border-l-4 border-green-600 p-3 rounded-md">
-              <p className="font-semibold">🌾 AI + Expert Recommendation:</p>
+              <p className="font-semibold">🌾 Expert Recommendation:</p>
               <p>{recommendation}</p>
             </div>
           )}

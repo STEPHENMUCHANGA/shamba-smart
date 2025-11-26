@@ -32,9 +32,9 @@ export default function Home() {
             ShambaSmart
           </motion.h1>
           <p className="text-gray-600 text-lg mt-2">
-            Smarter farming decisions through our partners' expertise
+            Smarter farming decisions through our partners'
             <br />
-            and AI-powered soil insights.
+            expertise-powered soil insights.
           </p>
         </header>
 
@@ -49,7 +49,7 @@ export default function Home() {
               Optimise Yield
             </h3>
             <p className="text-gray-600 text-sm">
-              Use AI insights and our partners' expertise to analyse soil data
+              Use expertise-powered insights and our partners to analyse soil data
               <br />
               and improve your crop performance.
             </p>
@@ -95,7 +95,7 @@ export default function Home() {
           <p className="text-gray-600 text-center mb-6">
             Enter your soil data to get tailored insights and 
             <br />
-            recommendations based on AI and our partners' expertise.
+            recommendations based on our partners' expertise.
           </p>
 
           {/* ✅ Only show form if logged in */}

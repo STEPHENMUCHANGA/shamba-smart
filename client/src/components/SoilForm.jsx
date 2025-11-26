@@ -62,7 +62,7 @@ export default function SoilForm() {
         <input
           name="ph"
           placeholder="pH"
-          type="number"
+          type="float"
           onChange={handleChange}
         />
 
@@ -89,7 +89,7 @@ export default function SoilForm() {
 
         <textarea
           name="notes"
-          placeholder="Notes"
+          placeholder="Analysis Notes"
           onChange={handleChange}
         />
 

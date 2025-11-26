@@ -26,7 +26,7 @@ function Navbar({ user, logout }) {
           <div className="logo-container flex flex-col leading-tight">
           <span className="logo">🌾 ShambaSmart</span>
           <br />
-          <span className="text-sm text-gray-600">AI-powered agriculture platform in Kenya</span>
+          <span className="text-sm text-gray-600">Experts'-powered agriculture platform in Kenya</span>
           </div>
         <div className="nav-left">
           {user && <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>Home</NavLink>}

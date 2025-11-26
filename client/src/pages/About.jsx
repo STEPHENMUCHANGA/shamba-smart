@@ -6,7 +6,7 @@ export default function About() {
       <div className="bg-white p-10 rounded-2xl shadow-lg w-full max-w-3xl text-center">
         <h2 className="text-3xl font-bold text-green-800 mb-4">About ShambaSmart 🌍</h2>
         <p className="text-gray-700 mb-4">
-          ShambaSmart empowers farmers with AI-driven soil and crop insights, helping improve yield, efficiency, and sustainability.
+          ShambaSmart empowers farmers with Expert-driven soil and crop insights, helping improve yield, efficiency, and sustainability.
         </p>
         <p className="text-gray-700 mb-4">
           Our platform combines cutting-edge technology with local expertise to deliver actionable recommendations.
