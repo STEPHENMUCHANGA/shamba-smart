@@ -16,7 +16,7 @@ function Weather() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/weather/get`,
+        `${import.meta.env.VITE_API_URL}/weather/get`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -2,44 +2,47 @@ const axios = require('axios');
 
 const getWeather = async (req, res) => {
   try {
-    console.log('🔔 Received weather request:', req.body);
+    console.log("🌍 Weather request received:", req.body);
+
     const { location } = req.body;
 
-    if (!location || location.trim() === '') {
-      return res.status(400).json({ error: 'Location is required' });
+    if (!location || location.trim() === "") {
+      return res.status(400).json({ error: "Location is required" });
     }
 
-    // Read AI backend URL
-    const aiBase = process.env.AI_API_URL?.trim();
-    if (!aiBase) {
-      console.error('❌ AI_API_URL missing in environment!');
-      return res.status(500).json({ error: 'AI server URL not configured' });
+    // Example weather API: OpenWeatherMap or any other
+    const apiKey = process.env.OPENWEATHER_KEY;
+
+    if (!apiKey) {
+      console.error("❌ OPENWEATHER_KEY missing in environment!");
+      return res.status(500).json({ error: "Weather API key not configured" });
     }
 
-    const aiUrl = `${aiBase.replace(/\/$/, '')}/api/gemini/weather`;
-    console.log('🌦️ Calling Gemini Weather Service at:', aiUrl);
+    // Build request URL (OpenWeatherMap)
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+      location
+    )}&appid=${apiKey}&units=metric`;
 
-    // Call AI backend with increased timeout
-    const aiResponse = await axios.post(
-      aiUrl,
-      { location },
-      { timeout: 60000 }
-    );
+    console.log("📡 Fetching from weather API:", apiUrl);
 
-    console.log('✅ Weather response received:', aiResponse.data);
+    const response = await axios.get(apiUrl, { timeout: 20000 });
+
+    console.log("✅ Weather API response:", response.data);
 
     return res.status(200).json({
-      weather: aiResponse.data.weather || null,
-      forecast: aiResponse.data.forecast || null,
-      ai_prediction: aiResponse.data.ai_prediction || null,
-      message: 'Weather retrieved successfully'
+      location: response.data.name,
+      temperature: response.data.main.temp,
+      humidity: response.data.main.humidity,
+      description: response.data.weather?.[0]?.description || "N/A",
+      wind_speed: response.data.wind?.speed || null,
+      message: "Weather retrieved successfully"
     });
 
   } catch (err) {
-    console.error('❌ Weather error:', err.response?.data || err.message);
+    console.error("❌ Weather fetch error:", err.response?.data || err.message);
 
     return res.status(500).json({
-      error: 'Failed to fetch weather',
+      error: "Failed to fetch weather",
       details: err.response?.data || err.message
     });
   }
