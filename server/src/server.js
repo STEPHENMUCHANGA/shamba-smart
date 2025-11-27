@@ -3,6 +3,22 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const mongoose = require("mongoose");
+
+// CONNECT SERVER TO MONGODB
+require("./utils/db");
+  
+
+// SERVER MOUNTING
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ Connected to MongoDB"))
+.catch((err) => {
+  console.error("❌ MongoDB connection error:", err);
+  process.exit(1);
+});
 
 const app = express();
 
@@ -24,6 +40,11 @@ app.use(
 // Parse JSON
 app.use(express.json());
 
+// TEMPORARY DEBUG — test if soil.routes.js loads
+console.log("Loading soil routes...");
+const soilRoutes = require("./routes/soil.routes");
+console.log("Soil routes loaded successfully!");
+
 // --------------------------------------------------------
 // ROOT TEST ROUTE
 // --------------------------------------------------------
@@ -34,44 +55,46 @@ app.get("/", (req, res) => {
 // --------------------------------------------------------
 // SOIL ANALYSIS (NODE-ONLY LOGIC)
 // --------------------------------------------------------
-app.post("/api/soil/analyze", (req, res) => {
-  console.log("📥 Incoming soil analysis:", req.body);
+// app.post("/api/soil/analyze", (req, res) => {
+//   console.log("📥 Incoming soil analysis:", req.body);
 
-  const { ph, nitrogen, phosphorus, potassium } = req.body;
+//   const { ph, nitrogen, phosphorus, potassium } = req.body;
 
-  if (!ph || !nitrogen || !phosphorus || !potassium) {
-    return res.status(400).json({
-      error: "Missing required soil input values",
-    });
-  }
+//   if (!ph || !nitrogen || !phosphorus || !potassium) {
+//     return res.status(400).json({
+//       error: "Missing required soil input values",
+//     });
+//   }
 
-  // Basic soil logic
-  let soilStatus =
-    ph < 6.0
-      ? "Acidic"
-      : ph >= 6.0 && ph <= 7.5
-      ? "Optimal"
-      : "Alkaline";
+//   // Basic soil logic
+//   let soilStatus =
+//     ph < 6.0
+//       ? "Acidic"
+//       : ph >= 6.0 && ph <= 7.5
+//       ? "Optimal"
+//       : "Alkaline";
 
-  let recommendedCrop =
-    ph < 5.5 ? "Sweet Potatoes" : ph < 7.5 ? "Maize" : "Sorghum";
+//   let recommendedCrop =
+//     ph < 5.5 ? "Sweet Potatoes" : ph < 7.5 ? "Maize" : "Sorghum";
 
-  let expectedYield =
-    recommendedCrop === "Maize" ? "4.5 tons/ha" : "3.1 tons/ha";
+//   let expectedYield =
+//     recommendedCrop === "Maize" ? "4.5 tons/ha" : "3.1 tons/ha";
 
-  let fertilizerAdvice =
-    nitrogen < 100
-      ? "Apply CAN fertilizer (100kg/ha)"
-      : "Nitrogen levels are adequate";
+//   let fertilizerAdvice =
+//     nitrogen < 100
+//       ? "Apply CAN fertilizer (100kg/ha)"
+//       : "Nitrogen levels are adequate";
 
-  return res.json({
-    soilStatus,
-    recommendedCrop,
-    expectedYield,
-    fertilizerAdvice,
-    received: req.body,
-  });
-});
+//   return res.json({
+//     soilStatus,
+//     recommendedCrop,
+//     expectedYield,
+//     fertilizerAdvice,
+//     received: req.body,
+//   });
+// });
+
+app.use("/api/soil", soilRoutes);
 
 // --------------------------------------------------------
 // WEATHER ENDPOINT (NODE-ONLY)

@@ -3,30 +3,25 @@ import React, { useState } from "react";
 import { analyzeSoil } from "../services/api";
 
 export default function SoilForm() {
-  const [state, setState] = useState({
-    farmerName: "",
-    county: "",
-    farmSize: "",
-    ph: "",
-    nitrogen: "",
-    phosphorus: "",
-    potassium: "",
-    notes: "",
-  });
-
+  const [county, setCounty] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
 
   const handleChange = (e) => {
-    setState({ ...state, [e.target.name]: e.target.value });
+    setCounty(e.target.value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!county.trim()) {
+      alert("Please enter a county");
+      return;
+    }
     setLoading(true);
 
     try {
-      const response = await analyzeSoil(state);
+      // Only send county to backend
+      const response = await analyzeSoil(county.trim());
       setResult(response);
     } catch (err) {
       console.error("Soil form submit error:", err);
@@ -42,54 +37,9 @@ export default function SoilForm() {
 
       <form onSubmit={handleSubmit}>
         <input
-          name="farmerName"
-          placeholder="Farmer Name"
-          onChange={handleChange}
-        />
-
-        <input
           name="county"
           placeholder="County"
-          onChange={handleChange}
-        />
-
-        <input
-          name="farmSize"
-          placeholder="Farm Size (Acres)"
-          onChange={handleChange}
-        />
-
-        <input
-          name="ph"
-          placeholder="pH"
-          type="float"
-          onChange={handleChange}
-        />
-
-        <input
-          name="nitrogen"
-          placeholder="Nitrogen"
-          type="number"
-          onChange={handleChange}
-        />
-
-        <input
-          name="phosphorus"
-          placeholder="Phosphorus"
-          type="number"
-          onChange={handleChange}
-        />
-
-        <input
-          name="potassium"
-          placeholder="Potassium"
-          type="number"
-          onChange={handleChange}
-        />
-
-        <textarea
-          name="notes"
-          placeholder="Analysis Notes"
+          value={county}
           onChange={handleChange}
         />
 
@@ -101,11 +51,14 @@ export default function SoilForm() {
       {result && (
         <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
           <h3>Analysis Result</h3>
-          <p><strong>Soil Status:</strong> {result.soilStatus}</p>
-          <p><strong>Recommended Crop:</strong> {result.recommendedCrop}</p>
-          <p><strong>Expected Yield:</strong> {result.expectedYield}</p>
-          <p><strong>Fertilizer Advice:</strong> {result.fertilizerAdvice}</p>
-          <p><strong>Additional Notes:</strong> {result.additionalNotes}</p>
+          <p><strong>County:</strong> {result.county}</p>
+          <p><strong>Average pH:</strong> {result.average_ph}</p>
+          <p><strong>Nitrogen:</strong> {result.nitrogen}</p>
+          <p><strong>Phosphorus:</strong> {result.phosphorus}</p>
+          <p><strong>Potassium:</strong> {result.potassium}</p>
+          <p><strong>Soil Type:</strong> {result.soil_type}</p>
+          <p><strong>Recommended Crops:</strong> {result.recommended_crops.join(", ")}</p>
+          <p><strong>Source:</strong> {result.source}</p>
         </div>
       )}
     </div>

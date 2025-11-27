@@ -1,54 +1,36 @@
-const SoilSample = require('../models/SoilSample');
+const County = require("../models/county.model");
 
 const analyzeSoil = async (req, res) => {
   try {
-    console.log('🔔 Received soil analysis request:', req.body);
-    const sample = req.body;
+    console.log("📥 Incoming soil analysis:", req.body);
 
-    // Save to DB only
-    try {
-      const doc = new SoilSample(sample);
-      await doc.save();
-      console.log('💾 Soil sample saved with ID:', doc._id);
-    } catch (dbErr) {
-      console.warn('⚠️ DB save failed:', dbErr.message);
+    const { county } = req.body;
+
+    if (!county || county.trim() === "") {
+      return res.status(400).json({ error: "County is required" });
     }
 
-    // 🔍 Simple local (non-AI) soil analysis logic
-    const ph = parseFloat(sample.ph);
-    let soil_status = '';
-    let recommendation = '';
-    let predicted_yield = 0;
+    // Fetch from MongoDB
+    const data = await County.findOne({ county: county.trim() });
 
-    if (ph < 5.5) {
-      soil_status = 'Too acidic';
-      recommendation = 'Apply agricultural lime to raise soil pH.';
-      predicted_yield = 40;
-    } else if (ph >= 5.5 && ph <= 7.5) {
-      soil_status = 'Optimal pH range';
-      recommendation = 'Maintain current soil management practices.';
-      predicted_yield = 80;
-    } else {
-      soil_status = 'Too alkaline';
-      recommendation = 'Add sulfur or organic compost to lower pH.';
-      predicted_yield = 50;
+    if (!data) {
+      return res.status(404).json({ error: "County not found in database" });
     }
 
-    return res.status(200).json({
-      analysis: `Soil pH is ${ph}, indicating: ${soil_status}`,
-      recommendation,
-      predicted_yield,
-      soil_status,
-      message: 'Soil analyzed locally without AI'
+    res.status(200).json({
+      county: data.county,
+      average_ph: data.average_ph,
+      nitrogen: data.nitrogen,
+      phosphorus: data.phosphorus,
+      potassium: data.potassium,
+      soil_type: data.soil_type,
+      recommended_crops: data.recommended_crops,
+      source: "MongoDB seeded data"
     });
 
   } catch (err) {
-    console.error('❌ analyzeSoil error:', err.message);
-
-    return res.status(500).json({
-      error: 'Server error during soil analysis',
-      details: err.message
-    });
+    console.error("❌ Soil analysis error:", err.message);
+    res.status(500).json({ error: "Server error during soil analysis" });
   }
 };
 
