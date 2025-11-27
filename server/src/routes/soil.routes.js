@@ -1,32 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const { analyzeSoil } = require('../controllers/soil.controller');
 
 // ------------------------------
-// Python/Gemini backend URL
-// ------------------------------
-const VITE_AI_URL = process.env.VITE_AI_URL || 'http://localhost:10001';
-
-// ------------------------------
-// Soil analysis route
+// Soil analysis route (Node-only)
 // ------------------------------
 router.post('/analyze', async (req, res) => {
   try {
     const soilData = req.body;
-    console.log('🌐 Forwarding soil analysis to Python/Gemini backend...', soilData);
+    console.log('📥 Incoming soil analysis request:', soilData);
 
-    // Forward request to Python backend
-    const response = await axios.post(`${VITE_AI_URL}/api/analyze`, soilData, {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    // Use local analyzeSoil controller logic
+    const result = await analyzeSoil(soilData);
 
-    // Return response from Python/Gemini to frontend
-    res.json(response.data);
+    // Return the analysis to frontend
+    res.json(result);
   } catch (err) {
-    console.error('❌ Soil analysis route error:', err.response?.data || err.message);
+    console.error('❌ Soil analysis route error:', err.message || err);
     res.status(500).json({
       error: 'Failed to analyze soil',
-      details: err.response?.data || err.message,
+      details: err.message || err,
     });
   }
 });

@@ -3,28 +3,48 @@ const router = express.Router();
 const axios = require("axios");
 
 // ------------------------------
-// Python/Gemini backend URL
-// ------------------------------
-const VITE_AI_URL = process.env.VITE_AI_URL || "http://localhost:10001";
-
-// ------------------------------
-// Weather route
+// WEATHER ROUTE (Node-only with OpenWeather)
 // ------------------------------
 router.post("/get", async (req, res) => {
   try {
-    const requestData = req.body;
-    console.log("🌐 Forwarding weather request to Python/Gemini backend...", requestData);
+    const { location } = req.body;
+    console.log("🌍 Weather request received:", location);
 
-    const response = await axios.post(`${VITE_AI_URL}/api/gemini/weather`, requestData, {
-      headers: { "Content-Type": "application/json" },
+    if (!location || location.trim() === "") {
+      return res.status(400).json({ error: "Location is required" });
+    }
+
+    const apiKey = process.env.OPENWEATHER_KEY;
+
+    if (!apiKey) {
+      console.error("❌ OPENWEATHER_KEY missing in environment!");
+      return res.status(500).json({ error: "Weather API key not configured" });
+    }
+
+    // OpenWeather API request
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+      location
+    )}&appid=${apiKey}&units=metric`;
+
+    console.log("📡 Fetching weather from OpenWeather:", apiUrl);
+
+    const response = await axios.get(apiUrl, { timeout: 20000 });
+
+    console.log("✅ Weather API response:", response.data);
+
+    res.status(200).json({
+      location: response.data.name,
+      temperature: response.data.main.temp,
+      humidity: response.data.main.humidity,
+      condition: response.data.weather?.[0]?.main || "N/A",
+      wind_speed: response.data.wind?.speed || null,
+      message: "Weather retrieved successfully"
     });
-
-    // Return the response from Python/Gemini backend
-    res.json(response.data);
   } catch (err) {
-    console.error("❌ Weather route error:", err.response?.data || err.message);
+    console.error("❌ Weather fetch error:", err.response?.data || err.message);
+
     res.status(500).json({
-      error: "Failed to get weather",
+      error: "Failed to fetch weather",
       details: err.response?.data || err.message,
     });
   }

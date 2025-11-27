@@ -15,14 +15,12 @@ function Weather() {
     setRecommendation("");
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/weather/get`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ location }),
-        }
-      );
+      // IMPORTANT: GET request + county query parameter
+      const url = `${import.meta.env.VITE_API_URL}/weather/get?county=${encodeURIComponent(
+        location
+      )}`;
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error("Failed to fetch weather data");
@@ -97,7 +95,6 @@ function Weather() {
           <p>☁️ Condition: <strong>{weatherData.condition}</strong></p>
           <p>💧 Humidity: <strong>{weatherData.humidity}%</strong></p>
           <p>💨 Wind Speed: <strong>{weatherData.wind_speed} km/h</strong></p>
-          <p>🤖 Experts' Prediction: <strong>{weatherData.ai_prediction}</strong></p>
 
           {recommendation && (
             <div className="mt-4 bg-green-50 border-l-4 border-green-600 p-3 rounded-md">

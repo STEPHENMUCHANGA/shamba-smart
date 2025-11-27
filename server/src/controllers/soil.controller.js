@@ -1,4 +1,3 @@
-const axios = require('axios');
 const SoilSample = require('../models/SoilSample');
 
 const analyzeSoil = async (req, res) => {
@@ -6,45 +5,49 @@ const analyzeSoil = async (req, res) => {
     console.log('🔔 Received soil analysis request:', req.body);
     const sample = req.body;
 
-    // Save to DB (non-blocking)
+    // Save to DB only
     try {
       const doc = new SoilSample(sample);
       await doc.save();
       console.log('💾 Soil sample saved with ID:', doc._id);
     } catch (dbErr) {
-      console.warn('⚠️ DB save failed (continuing):', dbErr.message);
+      console.warn('⚠️ DB save failed:', dbErr.message);
     }
 
-  
-    // Read AI backend URL
-    const aiBase = process.env.AI_API_URL?.trim();
-    if (!aiBase) {
-      console.error('❌ AI_API_URL missing in environment!');
-      return res.status(500).json({ error: 'AI server URL not configured' });
+    // 🔍 Simple local (non-AI) soil analysis logic
+    const ph = parseFloat(sample.ph);
+    let soil_status = '';
+    let recommendation = '';
+    let predicted_yield = 0;
+
+    if (ph < 5.5) {
+      soil_status = 'Too acidic';
+      recommendation = 'Apply agricultural lime to raise soil pH.';
+      predicted_yield = 40;
+    } else if (ph >= 5.5 && ph <= 7.5) {
+      soil_status = 'Optimal pH range';
+      recommendation = 'Maintain current soil management practices.';
+      predicted_yield = 80;
+    } else {
+      soil_status = 'Too alkaline';
+      recommendation = 'Add sulfur or organic compost to lower pH.';
+      predicted_yield = 50;
     }
-
-    const aiUrl = `${aiBase.replace(/\/$/, '')}/api/analyze`;
-    console.log('🌐 Calling AI service at:', aiUrl);
-
-    // Call AI backend with longer timeout
-    const aiResponse = await axios.post(aiUrl, sample, { timeout: 60000 });
-
-    console.log('✅ AI response received');
 
     return res.status(200).json({
-      analysis: aiResponse.data.analysis,
-      recommendation: aiResponse.data.recommendation,
-      predicted_yield: aiResponse.data.predicted_yield,
-      soil_status: aiResponse.data.soil_status,
-      message: 'Soil analyzed successfully'
+      analysis: `Soil pH is ${ph}, indicating: ${soil_status}`,
+      recommendation,
+      predicted_yield,
+      soil_status,
+      message: 'Soil analyzed locally without AI'
     });
 
   } catch (err) {
-    console.error('❌ analyzeSoil error:', err.response?.data || err.message);
+    console.error('❌ analyzeSoil error:', err.message);
 
     return res.status(500).json({
       error: 'Server error during soil analysis',
-      details: err.response?.data || err.message
+      details: err.message
     });
   }
 };

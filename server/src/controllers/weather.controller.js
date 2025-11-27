@@ -10,7 +10,6 @@ const getWeather = async (req, res) => {
       return res.status(400).json({ error: "Location is required" });
     }
 
-    // Example weather API: OpenWeatherMap or any other
     const apiKey = process.env.OPENWEATHER_KEY;
 
     if (!apiKey) {
@@ -18,16 +17,13 @@ const getWeather = async (req, res) => {
       return res.status(500).json({ error: "Weather API key not configured" });
     }
 
-    // Build request URL (OpenWeatherMap)
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
-      location
-    )}&appid=${apiKey}&units=metric`;
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${apiKey}&units=metric`;
 
-    console.log("📡 Fetching from weather API:", apiUrl);
+    console.log("📡 Fetching from OpenWeather API:", apiUrl);
 
     const response = await axios.get(apiUrl, { timeout: 20000 });
 
-    console.log("✅ Weather API response:", response.data);
+    console.log("✅ OpenWeather API response:", response.data);
 
     return res.status(200).json({
       location: response.data.name,
