@@ -18,7 +18,7 @@ export default function Pricing() {
 
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-green-100">
             <h3 className="text-xl font-semibold text-green-700 mb-2">Pro</h3>
-            <p className="text-gray-600 mb-4">Full AI analysis with custom insights from our partners.</p>
+            <p className="text-gray-600 mb-4">Full Experts' analysis with custom insights from our partners.</p>
             <p className="text-2xl font-bold mb-4">KSh1500/mo</p>
             <button className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition">
               Subscribe

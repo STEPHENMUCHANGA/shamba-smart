@@ -34,7 +34,7 @@ export default function Home() {
           <p className="text-gray-600 text-lg mt-2">
             Smarter farming decisions through our partners'
             <br />
-            expertise-powered soil insights.
+            expertise-powered soil insights, crop recommendations, and weather insights.
           </p>
         </header>
 
@@ -49,9 +49,9 @@ export default function Home() {
               Optimise Yield
             </h3>
             <p className="text-gray-600 text-sm">
-              Use expertise-powered insights and our partners to analyse soil data
+              Use expertise-powered insights and our partners to get soil data and improve your
               <br />
-              and improve your crop performance.
+               farming practices.
             </p>
           </motion.div>
 
@@ -61,10 +61,10 @@ export default function Home() {
           >
             <Droplets className="mx-auto text-blue-500 mb-3" size={44} />
             <h3 className="font-semibold text-green-700 text-xl mb-2">
-              Monitor Moisture
+              Monitor Fertility and Weather Patterns
             </h3>
             <p className="text-gray-600 text-sm">
-              Track soil moisture levels and plan irrigation effectively.
+              Track and provide soil macronutrients, pH levels, and weather conditions to make informed decisions
             </p>
           </motion.div>
 
@@ -77,7 +77,7 @@ export default function Home() {
               Sustainable Growth
             </h3>
             <p className="text-gray-600 text-sm">
-              Promote eco-friendly and efficient farming practices.
+              Promote eco-friendly and efficient farming practices wherever you farm is located
             </p>
           </motion.div>
         </section>
@@ -90,12 +90,12 @@ export default function Home() {
           className="bg-white shadow-2xl rounded-3xl mt-16 mb-20 w-full max-w-2xl p-10 border border-green-200"
         >
           <h2 className="text-2xl font-semibold text-green-800 mb-4 text-center">
-            Soil Analysis Tool
+            Soil Insights Tool
           </h2>
           <p className="text-gray-600 text-center mb-6">
-            Enter your soil data to get tailored insights and 
+            Enter your County name to get tailored insights and recommendations based
             <br />
-            recommendations based on our partners' expertise.
+             on our partners' expertise.
           </p>
 
           {/* ✅ Only show form if logged in */}

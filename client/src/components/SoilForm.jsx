@@ -33,7 +33,7 @@ export default function SoilForm() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Soil Analysis</h2>
+      <h2>Soil Insights</h2>
 
       <form onSubmit={handleSubmit}>
         <input

@@ -51,7 +51,7 @@ export default function FreeTrial() {
             🌱 Your Free Trial is Active
           </h2>
           <p className="text-gray-700 mb-6 text-center">
-            You have full access to the analysis tools for 7 days.
+            You have full access to the Experts'-powered soil insights tools, crop recommendations, and weather insights for 7 days.
           </p>
           <SoilForm /> {/* 👈 show the form directly */}
         </div>
@@ -89,7 +89,7 @@ export default function FreeTrial() {
           Start Your Free Trial 🌱
         </h2>
         <p className="text-gray-700 mb-6">
-          Enjoy 7 days of full access to ShambaSmart’s AI-powered soil analysis tools and crop recommendations.
+          Enjoy 7 days of full access to ShambaSmart’s Experts'-powered soil insights tools, crop recommendations, and weather insights.
         </p>
         <button
           onClick={handleStartTrial}
